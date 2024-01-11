@@ -63,6 +63,23 @@ class List():
             counter = counter.next
             i += 1
 
+    def __str__(self):
+        ret_str = ''
+
+        if self.head.pesel is None:
+            return "Lista pacjentów jest pusta"
+
+        
+        counter = self.head
+        i = 1
+        dlugosc = self.Length()
+        while i <= dlugosc:
+            ret_str = f"{i}: {counter.imie} {counter.nazwisko} PESEL: {counter.pesel} wiek: {counter.wiek} plec: {counter.plec} przyjęty/a: {counter.godzina}"
+            counter = counter.next
+            i += 1
+
+        return ret_str
+
     def Length(self):
         if self.head.pesel is None:
             return 0
