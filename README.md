@@ -12,7 +12,7 @@
 
     Windows usery: 
 
-    1. `.\venv\Scripts\activate`
+    1. `.\.venv\Scripts\activate`
     1. eat shit and die loosers(no offense)
 
 1. Zainstaluj gówne które jest potrzebne żeby projekt działał 
