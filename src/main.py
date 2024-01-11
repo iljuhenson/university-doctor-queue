@@ -1,10 +1,15 @@
 import PySimpleGUI as sg
 from logic import doctor_queue_logic as logic
 
+patient_list = logic.List()
+
 sg.theme('DarkAmber')   # Add a touch of color
 # ----------- Create the 3 layouts this Window will display -----------
+
 layout1 = [
-    
+    [sg.Text('Kolejka')],
+    [sg.Text(str(patient_list), key='-OUT_LIST-')],
+    [sg.Button('Dodaj pacjenta'), sg.Button('Zamknij')]
 ]
 
 layout2 = [
@@ -13,37 +18,28 @@ layout2 = [
     [sg.Text('Nazwisko'), sg.Input(key='-IN_SURNAME-')],
     [sg.Text('Pesel'), sg.Input(key='-IN_PESEL-')],
     [sg.Text('Wiek'), sg.Slider(range=(0, 100), orientation='h', key='-IN_AGE-')],
-    [sg.Text('Imie'), sg.Input(key='-IN_SEX-')],
+    [sg.Text('Plec'), sg.Input(key='-IN_SEX-')],
     [sg.Checkbox('Czy jest priorytetowym?', key='-IN_IS_PRIORITY-')],
-    [sg.Button('Dodaj pacjenta'), sg.Button('Powrót do widoku głównego')],
+    [sg.Button('Zatwerdź'), sg.Button('Powrót do widoku głównego')],
 ]
 
-layout3 = [[sg.Text('Kolejka')],
-           *[[sg.R(f'Radio {i}', 1)] for i in range(8)]]
 
 # ----------- Create actual layout using Columns and a row of Buttons
-layout = [[sg.Column(layout1, key='-MAIN-'), sg.Column(layout2, visible=False, key='-ADD_PATIENT-'), sg.Column(layout3, visible=False, key='-COL3-')],
-          [sg.Button('Cycle Layout'), sg.Button('1'), sg.Button('2'), sg.Button('3'), sg.Button('Exit')]]
+layout = [
+    [sg.Column(layout1, key='-MAIN-'), sg.Column(layout2, visible=False, key='-ADD_PATIENT-')]
+]
 
 window = sg.Window('Swapping the contents of a window', layout)
 
 layout = 1  # The currently visible layout
 
-patient_list = logic.List()
 
 while True:
     event, values = window.read()
     print(event, values)
-    if event in (None, 'Exit'):
+    if event in (None, 'Zamknij'):
         break
-    # if event == 'Cycle Layout':
-    #     window[f'-COL{layout}-'].update(visible=False)
-    #     layout = layout + 1 if layout < 3 else 1
-    #     window[f'-COL{layout}-'].update(visible=True)
-    # elif event in '123':
-    #     window[f'-COL{layout}-'].update(visible=False)
-    #     layout = int(event)
-    #     window[f'-COL{layout}-'].update(visible=True)
+
     if event == 'Zatwerdź':
         name = values['-IN_NAME-']
         surname = values['-IN_SURNAME-']
@@ -51,10 +47,24 @@ while True:
         age = int(values['-IN_AGE-'])
         sex = values['-IN_SEX-']
 
-        patient_list.dodajPacjenta(imie, nazwisko, pesel, wiek, sex)
+        window['-IN_NAME-']('')
+        window['-IN_SURNAME-']('')
+        window['-IN_PESEL-']('')
+        window['-IN_AGE-'](0)
+        window['-IN_SEX-']('')
+
+        patient_list.dodajPacjenta(name, surname, pesel, age, sex)
+        
+        window['-OUT_LIST-'].update(str(patient_list))
+
+        window[f'-ADD_PATIENT-'].update(visible=False)
+        window[f'-MAIN-'].update(visible=True)
 
     elif event == 'Powrót do widoku głównego':
         window[f'-ADD_PATIENT-'].update(visible=False)
-        layout = int(event)
         window[f'-MAIN-'].update(visible=True)
+
+    elif event == 'Dodaj pacjenta':
+        window[f'-MAIN-'].update(visible=False)
+        window[f'-ADD_PATIENT-'].update(visible=True)
 window.close()

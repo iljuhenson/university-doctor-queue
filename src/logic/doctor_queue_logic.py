@@ -74,7 +74,8 @@ class List():
         i = 1
         dlugosc = self.Length()
         while i <= dlugosc:
-            ret_str = f"{i}: {counter.imie} {counter.nazwisko} PESEL: {counter.pesel} wiek: {counter.wiek} plec: {counter.plec} przyjęty/a: {counter.godzina}"
+            ret_str += f"{i}: {counter.imie} {counter.nazwisko} PESEL: {counter.pesel} wiek: {counter.wiek} plec: {counter.plec} przyjęty/a: {counter.godzina}\n"
+            
             counter = counter.next
             i += 1
 
