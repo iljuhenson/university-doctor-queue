@@ -17,7 +17,7 @@ class List():
 
     def dodajPacjenta(self, imie, nazwisko, pesel, wiek, plec):
         appended_node = Node(imie, nazwisko, pesel, wiek, plec)
-        if self.head.pesel is None:
+        if self.head is None or self.head.pesel is None:
             self.head = appended_node
         else:
             counter = self.head
@@ -51,7 +51,7 @@ class List():
 
 
     def Wyswietl(self):
-        if self.head.pesel is None:
+        if self.head is None or self.head.pesel is None:
             print("Lista pacjentów jest pusta")
             return
         print("Lista pacjentów:")
@@ -66,7 +66,7 @@ class List():
     def __str__(self):
         ret_str = ''
 
-        if self.head.pesel is None:
+        if self.head is None or self.head.pesel is None:
             return "Lista pacjentów jest pusta"
 
         
@@ -82,7 +82,7 @@ class List():
         return ret_str
 
     def Length(self):
-        if self.head.pesel is None:
+        if self.head is None or self.head.pesel is None:
             return 0
         else:
             i = 1
@@ -93,7 +93,7 @@ class List():
             return i
 
     def UsunPacjenta(self, miejsce):
-        if self.head.pesel is None:
+        if self.head is None or self.head.pesel is None:
             print("Lista pacjentów jest pusta")
             return
         dlugosc = self.Length()

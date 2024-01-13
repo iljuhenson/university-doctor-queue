@@ -102,6 +102,15 @@ while True:
         update_list_dependant_fields(window)
         change_layout_to(window, '-MAIN-')
 
+    elif event == "Usuń":
+        place = values['-IN_REMOVE_PATIENT-']
+        patient_list.UsunPacjenta(place)
+
+        window['-IN_REMOVE_PATIENT-'](1)
+
+        update_list_dependant_fields(window)
+        change_layout_to(window, '-MAIN-')
+
     elif event == 'Powrót do widoku głównego' or event == '-RETURN_TO_MAIN-':
         change_layout_to(window, '-MAIN-')
         clear_all_fields(window)
