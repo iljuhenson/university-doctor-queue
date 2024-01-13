@@ -13,7 +13,7 @@ class Node():
 
 class List():
     def __init__(self):
-        self.head = Node()
+        self.head = None
 
     def dodajPacjenta(self, imie, nazwisko, pesel, wiek, plec):
         if not pesel.isnumeric():
@@ -23,7 +23,7 @@ class List():
         if not "MFN".__contains__(plec):
             raise Exception("Nie ma płci takiej, zakaz") #proszę nie wstawiać tego na twitter
         appended_node = Node(imie, nazwisko, pesel, wiek, plec)
-        if self.head is None or self.head.pesel is None:
+        if self.head is None:
             self.head = appended_node
         else:
             counter = self.head
@@ -54,7 +54,7 @@ class List():
 
 
     def Wyswietl(self):
-        if self.head is None or self.head.pesel is None:
+        if self.head is None:
             print("Lista pacjentów jest pusta")
             return
         print("Lista pacjentów:")
@@ -69,7 +69,7 @@ class List():
     def __str__(self):
         ret_str = ''
 
-        if self.head is None or self.head.pesel is None:
+        if self.head is None:
             return "Lista pacjentów jest pusta"
 
         
@@ -85,7 +85,7 @@ class List():
         return ret_str
 
     def Length(self):
-        if self.head is None or self.head.pesel is None:
+        if self.head is None:
             return 0
         else:
             i = 1
@@ -96,13 +96,13 @@ class List():
             return i
 
     def UsunPacjenta(self, miejsce):
-        if self.head is None or self.head.pesel is None:
+        if self.head is None:
             raise Exception("Lista pacjentów jest pusta!")
 
         dlugosc = self.Length()
         if 1 > miejsce or miejsce > dlugosc:
             raise Exception("Nie ma pacjenta na takim miejscu.")
-        
+
         i = 1
         previous = None
         counter = self.head
