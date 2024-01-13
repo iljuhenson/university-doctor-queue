@@ -1,6 +1,31 @@
 import PySimpleGUI as sg
 from logic import doctor_queue_logic as logic
 
+
+def clear_all_fields(window):
+    window['-IN_NAME-']('')
+    window['-IN_SURNAME-']('')
+    window['-IN_PESEL-']('')
+    window['-IN_AGE-'](0)
+    window['-IN_SEX-']('')
+    window['-IN_IS_PRIORITY-'](False)
+    window['-IN_PLACE-'](1)
+    window['-IN_PLACE-'].update(visible=False)
+    window['-IN_REMOVE_PATIENT-'](1)
+
+def update_list_dependant_fields(window):
+    window['-OUT_LIST-'].update(str(patient_list))
+    window['-IN_PLACE-'].update(range=(1, 1 if not patient_list.Length() else patient_list.Length()))
+    window['-IN_REMOVE_PATIENT-'].update(range=(1, 1 if not patient_list.Length() else patient_list.Length()))
+
+def change_layout_to(window, new_layout_key):
+    window['-ADD_PATIENT-'].update(visible=False)
+    window['-REMOVE_PATIENT-'].update(visible=False)
+    window['-MAIN-'].update(visible=False)
+
+    window[new_layout_key].update(visible=True)
+
+
 patient_list = logic.List()
 
 sg.theme('DarkAmber')   # Add a touch of color
@@ -9,7 +34,7 @@ sg.theme('DarkAmber')   # Add a touch of color
 layout1 = [
     [sg.Text('Kolejka')],
     [sg.Text(str(patient_list), key='-OUT_LIST-')],
-    [sg.Button('Dodaj pacjenta'), sg.Button('Zamknij')]
+    [sg.Button('Dodaj pacjenta'), sg.Button('Usuń pacjenta'), sg.Button('Zamknij'),],
 ]
 
 layout2 = [
@@ -19,19 +44,23 @@ layout2 = [
     [sg.Text('Pesel'), sg.Input(key='-IN_PESEL-')],
     [sg.Text('Wiek'), sg.Slider(range=(0, 100), orientation='h', key='-IN_AGE-')],
     [sg.Text('Plec'), sg.Input(key='-IN_SEX-')],
-    [sg.Checkbox('Czy jest priorytetowym?', key='-IN_IS_PRIORITY-')],
-    [sg.Button('Zatwerdź'), sg.Button('Powrót do widoku głównego')],
+    [sg.Checkbox('Czy jest priorytetowym?', key='-IN_IS_PRIORITY-', enable_events=True, default=False)],
+    [sg.Text('Wybierz mejsce'), sg.Slider(range=(1, 1 if not patient_list.Length() else patient_list.Length()), orientation='h', key='-IN_PLACE-', visible=False)],
+    [sg.Button('Zatwerdź'), sg.Button('Powrót do widoku głównego', key='-RETURN_TO_MAIN-')],
 ]
 
+layout3 = [
+    [sg.Text('Usun pacjenta po numeru:')],
+    [sg.Slider(range=(1, 1 if not patient_list.Length() else patient_list.Length()), orientation='h', key='-IN_REMOVE_PATIENT-')],
+    [sg.Button('Usuń'), sg.Button('Powrót do widoku głównego')],
+]
 
 # ----------- Create actual layout using Columns and a row of Buttons
 layout = [
-    [sg.Column(layout1, key='-MAIN-'), sg.Column(layout2, visible=False, key='-ADD_PATIENT-')]
+    [sg.Column(layout1, key='-MAIN-'), sg.Column(layout2, visible=False, key='-ADD_PATIENT-'), sg.Column(layout3, visible=False, key='-REMOVE_PATIENT-')]
 ]
 
-window = sg.Window('Swapping the contents of a window', layout)
-
-layout = 1  # The currently visible layout
+window = sg.Window('Kolejka do doktora', layout)
 
 
 while True:
@@ -40,31 +69,53 @@ while True:
     if event in (None, 'Zamknij'):
         break
 
-    if event == 'Zatwerdź':
+    if event == '-IN_IS_PRIORITY-' and values['-IN_IS_PRIORITY-']:
+        print(values['-IN_IS_PRIORITY-'])
+        window['-IN_PLACE-'].update(visible=True)
+    
+    elif event == '-IN_IS_PRIORITY-' and not values['-IN_IS_PRIORITY-']:
+        window['-IN_PLACE-'].update(visible=False)
+
+    elif event == 'Zatwerdź':
         name = values['-IN_NAME-']
         surname = values['-IN_SURNAME-']
         pesel = values['-IN_PESEL-']
         age = int(values['-IN_AGE-'])
         sex = values['-IN_SEX-']
+        is_priority = values['-IN_IS_PRIORITY-']
+        place = values['-IN_PLACE-']
 
         window['-IN_NAME-']('')
         window['-IN_SURNAME-']('')
         window['-IN_PESEL-']('')
         window['-IN_AGE-'](0)
         window['-IN_SEX-']('')
+        window['-IN_IS_PRIORITY-'](False)
+        window['-IN_PLACE-'](0)
+        window['-IN_PLACE-'].update(visible=False)
 
-        patient_list.dodajPacjenta(name, surname, pesel, age, sex)
+        if is_priority:
+            patient_list.dodajPacjentaPriorytetowego(place, name, surname, pesel, age, sex)
+        else:
+            patient_list.dodajPacjenta(name, surname, pesel, age, sex)
         
-        window['-OUT_LIST-'].update(str(patient_list))
+        update_list_dependant_fields(window)
+        change_layout_to(window, '-MAIN-')
 
-        window[f'-ADD_PATIENT-'].update(visible=False)
-        window[f'-MAIN-'].update(visible=True)
-
-    elif event == 'Powrót do widoku głównego':
-        window[f'-ADD_PATIENT-'].update(visible=False)
-        window[f'-MAIN-'].update(visible=True)
+    elif event == 'Powrót do widoku głównego' or event == '-RETURN_TO_MAIN-':
+        change_layout_to(window, '-MAIN-')
+        clear_all_fields(window)
 
     elif event == 'Dodaj pacjenta':
-        window[f'-MAIN-'].update(visible=False)
-        window[f'-ADD_PATIENT-'].update(visible=True)
+        change_layout_to(window, '-ADD_PATIENT-')
+
+    elif event == 'Usuń pacjenta':
+        change_layout_to(window, '-REMOVE_PATIENT-')
+
+    elif event == 'Usuń':
+        numer_pacjenta = window['-IN_REMOVE_PATIENT-']
+        clear_all_fields(window)
+        change_layout_to(window, '-MAIN-')
+
+
 window.close()
