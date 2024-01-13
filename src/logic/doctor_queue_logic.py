@@ -16,6 +16,12 @@ class List():
         self.head = Node()
 
     def dodajPacjenta(self, imie, nazwisko, pesel, wiek, plec):
+        if not pesel.isnumeric():
+            raise Exception("Pesel może składać się tylko z liczb.") #it aint some fucking name you moron
+        if wiek < 0 or wiek > 100:
+            raise Exception("Nie da się mieć tyle lat, nie można")
+        if not "MFN".__contains__(plec):
+            raise Exception("Nie ma płci takiej, zakaz") #proszę nie wstawiać tego na twitter
         appended_node = Node(imie, nazwisko, pesel, wiek, plec)
         if self.head is None or self.head.pesel is None:
             self.head = appended_node
@@ -27,12 +33,9 @@ class List():
 
     def dodajPacjentaPriorytetowego(self, miejsce, imie, nazwisko, pesel, wiek, plec):
         if miejsce < 1:
-            print("Numeracja miejsc zaczyna się od 1")
-            return
+            raise Exception("Numeracja miejsc zaczyna się od 1")
         if miejsce > self.Length():
-            print("Nie ma tylu pacjentów, pacjent dodany na ostatnie miejsce")
-            self.dodajPacjenta(imie, nazwisko, pesel, wiek, plec)
-            return
+            raise Exception("Nie ma tylu pacjentów, pacjent dodany na ostatnie miejsce")
 
         appended_node = Node(imie, nazwisko, pesel, wiek, plec)
         counter = self.head
@@ -94,12 +97,12 @@ class List():
 
     def UsunPacjenta(self, miejsce):
         if self.head is None or self.head.pesel is None:
-            print("Lista pacjentów jest pusta")
-            return
+            raise Exception("Lista pacjentów jest pusta!")
+
         dlugosc = self.Length()
         if 1 > miejsce or miejsce > dlugosc:
-            print("Nie ma pacjenta na takim miejscu")
-            return
+            raise Exception("Nie ma pacjenta na takim miejscu.")
+        
         i = 1
         previous = None
         counter = self.head
@@ -116,7 +119,7 @@ class List():
 if __name__ == "__main__":
     pacjenci = List()
     pacjenci.dodajPacjenta("Szymon", "Mlonek", "123", 21, "M")
-    pacjenci.dodajPacjenta("Ilya", "Pauliuk", "321", 20, "K")
+    pacjenci.dodajPacjenta("Ilya", "Pauliuk", "321", 20, "F")
     pacjenci.dodajPacjentaPriorytetowego(2, "Szymon2", "Mlonek", "123123", 12, "M")
     pacjenci.Wyswietl()
     pacjenci.UsunPacjenta(2)
