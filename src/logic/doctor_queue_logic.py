@@ -2,6 +2,13 @@ from datetime import datetime
 
 class Node():
     def __init__(self, imie = None, nazwisko = None, pesel = None, wiek = None, plec = None):
+        if not pesel.isnumeric():
+            raise Exception("Pesel może składać się tylko z liczb.") #it aint some fucking name you moron
+        if wiek < 0 or wiek > 100:
+            raise Exception("Nie da się mieć tyle lat, nie można")
+        if plec not in "MFN":
+            raise Exception("Nie ma płci takiej, zakaz") #proszę nie wstawiać tego na twitter
+        
         self.imie = imie
         self.nazwisko = nazwisko
         self.pesel = pesel
@@ -16,12 +23,7 @@ class List():
         self.head = None
 
     def dodajPacjenta(self, imie, nazwisko, pesel, wiek, plec):
-        if not pesel.isnumeric():
-            raise Exception("Pesel może składać się tylko z liczb.") #it aint some fucking name you moron
-        if wiek < 0 or wiek > 100:
-            raise Exception("Nie da się mieć tyle lat, nie można")
-        if not "MFN".__contains__(plec):
-            raise Exception("Nie ma płci takiej, zakaz") #proszę nie wstawiać tego na twitter
+        
         appended_node = Node(imie, nazwisko, pesel, wiek, plec)
         if self.head is None:
             self.head = appended_node
@@ -35,7 +37,7 @@ class List():
         if miejsce < 1:
             raise Exception("Numeracja miejsc zaczyna się od 1")
         if miejsce > self.Length():
-            raise Exception("Nie ma tylu pacjentów, pacjent dodany na ostatnie miejsce")
+            raise Exception("Nie ma tylu pacjentów")
 
         appended_node = Node(imie, nazwisko, pesel, wiek, plec)
         counter = self.head
@@ -114,6 +116,12 @@ class List():
             previous.next = counter.next
         else:
             self.head = counter.next
+
+    def CzyKtosZnajdujeSieWKolejce(self):
+        if self.Length() > 0:
+            return True
+        else:
+            return False
 
 
 if __name__ == "__main__":

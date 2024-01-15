@@ -7,7 +7,11 @@ def clear_all_fields(window):
     window['-IN_SURNAME-']('')
     window['-IN_PESEL-']('')
     window['-IN_AGE-'](0)
-    window['-IN_SEX-']('')
+    # window['-IN_SEX-']('')
+    window['M'](True)
+    window['F'](False)
+    window['N'](False)
+    
     window['-IN_IS_PRIORITY-'](False)
     window['-IN_PLACE-'](1)
     window['-IN_PLACE-'].update(visible=False)
@@ -25,11 +29,19 @@ def change_layout_to(window, new_layout_key):
 
     window[new_layout_key].update(visible=True)
 
+def get_gender_choice(values):
+    if values['F']:
+        return 'F'
+    elif values['M']:
+        return 'M'
+    elif values['N']:
+        return 'N'
+    else:
+        raise Exception('Program nie zapewnia tego')
 
 patient_list = logic.List()
 
-sg.theme('DarkAmber')   # Add a touch of color
-# ----------- Create the 3 layouts this Window will display -----------
+sg.theme('DarkAmber')
 
 layout1 = [
     [sg.Text('Kolejka')],
@@ -43,9 +55,9 @@ layout2 = [
     [sg.Text('Nazwisko'), sg.Input(key='-IN_SURNAME-')],
     [sg.Text('Pesel'), sg.Input(key='-IN_PESEL-')],
     [sg.Text('Wiek'), sg.Slider(range=(0, 100), orientation='h', key='-IN_AGE-')],
-    [sg.Text('Plec'), sg.Input(key='-IN_SEX-')],
+    [sg.Text('Plec'), sg.Radio("Chłop", "gen", key='M', default=True), sg.Radio("Baba", "gen", key='F'), sg.Radio("Nie wiem", "gen", key='N')],
     [sg.Checkbox('Czy jest priorytetowym?', key='-IN_IS_PRIORITY-', enable_events=True, default=False)],
-    [sg.Text('Wybierz mejsce'), sg.Slider(range=(1, 1 if not patient_list.Length() else patient_list.Length()), orientation='h', key='-IN_PLACE-', visible=False)],
+    [sg.Text('Wybierz mejsce', key='-IN_PLACE_LABEL-', visible=False), sg.Slider(range=(1, 1 if not patient_list.Length() else patient_list.Length()), orientation='h', key='-IN_PLACE-', visible=False)],
     [sg.Button('Zatwerdź'), sg.Button('Powrót do widoku głównego', key='-RETURN_TO_MAIN-')],
 ]
 
@@ -55,7 +67,6 @@ layout3 = [
     [sg.Button('Usuń'), sg.Button('Powrót do widoku głównego')],
 ]
 
-# ----------- Create actual layout using Columns and a row of Buttons
 layout = [
     [sg.Column(layout1, key='-MAIN-'), sg.Column(layout2, visible=False, key='-ADD_PATIENT-'), sg.Column(layout3, visible=False, key='-REMOVE_PATIENT-')]
 ]
@@ -70,35 +81,43 @@ while True:
         break
 
     if event == '-IN_IS_PRIORITY-' and values['-IN_IS_PRIORITY-']:
+        if not patient_list.CzyKtosZnajdujeSieWKolejce():
+            sg.popup_ok('Nie możesz dodawać pacjenta priorytetowego poki nie dodasz jednego')
+            window['-IN_IS_PRIORITY-'](False)
+            # window['-IN_PLACE_LABEL-'](False)
+
+            continue
+
         print(values['-IN_IS_PRIORITY-'])
         window['-IN_PLACE-'].update(visible=True)
+        window['-IN_PLACE_LABEL-'].update(visible=True)
+
     
     elif event == '-IN_IS_PRIORITY-' and not values['-IN_IS_PRIORITY-']:
         window['-IN_PLACE-'].update(visible=False)
+        window['-IN_PLACE_LABEL-'].update(visible=False)
 
     elif event == 'Zatwerdź':
         name = values['-IN_NAME-']
         surname = values['-IN_SURNAME-']
         pesel = values['-IN_PESEL-']
         age = int(values['-IN_AGE-'])
-        sex = values['-IN_SEX-']
+        # sex = values['-IN_SEX-']
+        sex = get_gender_choice(values)
         is_priority = values['-IN_IS_PRIORITY-']
         place = values['-IN_PLACE-']
 
-        window['-IN_NAME-']('')
-        window['-IN_SURNAME-']('')
-        window['-IN_PESEL-']('')
-        window['-IN_AGE-'](0)
-        window['-IN_SEX-']('')
-        window['-IN_IS_PRIORITY-'](False)
-        window['-IN_PLACE-'](0)
-        window['-IN_PLACE-'].update(visible=False)
-
-        if is_priority:
-            patient_list.dodajPacjentaPriorytetowego(place, name, surname, pesel, age, sex)
-        else:
-            patient_list.dodajPacjenta(name, surname, pesel, age, sex)
+        try:
+            if is_priority:
+                patient_list.dodajPacjentaPriorytetowego(place, name, surname, pesel, age, sex)
+            else:
+                patient_list.dodajPacjenta(name, surname, pesel, age, sex)
+        except Exception as e:
+            sg.popup_ok(e)
+            continue
         
+        clear_all_fields(window)
+
         update_list_dependant_fields(window)
         change_layout_to(window, '-MAIN-')
 
@@ -119,6 +138,9 @@ while True:
         change_layout_to(window, '-ADD_PATIENT-')
 
     elif event == 'Usuń pacjenta':
+        if not patient_list.CzyKtosZnajdujeSieWKolejce():
+            sg.popup_ok('Nie możesz usuwać pacjenta poki nie dodasz jednego')
+            continue
         change_layout_to(window, '-REMOVE_PATIENT-')
 
     elif event == 'Usuń':
